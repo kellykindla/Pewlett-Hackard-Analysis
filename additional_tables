@@ -1,0 +1,79 @@
+--how many roles will need to be filled?
+SELECT e.emp_no,
+	e.first_name,
+	e.last_name, 
+	ti.title,
+	ti.from_date,
+	ti.to_date
+INTO retirement_titles2 
+FROM employees as e 
+INNER JOIN titles as ti 
+ON (e.emp_no = ti.emp_no)
+WHERE (e.birth_date BETWEEN '1952-01-01' AND '1955-12-31')
+AND (ti.to_date = '9999-01-01')
+ORDER BY emp_no; 
+
+SELECT * FROM retirement_titles2;
+-- Use Dictinct with Orderby to remove duplicate rows
+SELECT DISTINCT ON (rt2.emp_no) 
+	rt2.emp_no,
+	rt2.first_name,
+	rt2.last_name,
+	rt2.title
+INTO unique_titles2
+FROM retirement_titles2 as rt2 
+ORDER BY rt2.emp_no, rt2.to_date DESC;
+SELECT * FROM unique_titles2;
+
+-- get the number of employees by their most recent title about to retire
+SELECT COUNT(ut2.emp_no), ut2.title
+INTO retiring_titles2
+FROM unique_titles2 as ut2
+GROUP BY ut2.title
+ORDER BY COUNT DESC;
+SELECT * FROM retiring_titles2;
+SELECT SUM(count) FROM retiring_titles2;
+
+--getting current employees
+-- get the numnber of employees by their most recent title 
+SELECT e.emp_no,
+	e.first_name,
+	e.last_name, 
+	ti.title,
+	ti.from_date,
+	ti.to_date
+INTO current_titles2 
+FROM employees as e 
+INNER JOIN titles as ti 
+ON (e.emp_no = ti.emp_no)
+WHERE (e.birth_date NOT BETWEEN '1952-01-01' AND '1955-12-31')
+AND (ti.to_date = '9999-01-01')
+ORDER BY emp_no; 
+
+-- Use Dictinct with Orderby to remove duplicate rows
+SELECT DISTINCT ON (ct.emp_no) 
+	ct.emp_no,
+	ct.first_name,
+	ct.last_name,
+	ct.title
+INTO unique_current
+FROM current_titles2 as ct 
+ORDER BY ct.emp_no, ct.to_date DESC;
+SELECT * FROM unique_current;
+
+-- get the number of employees by their most recent title 
+SELECT COUNT(uc.emp_no), uc.title
+INTO current_titles
+FROM unique_current as uc
+GROUP BY uc.title
+ORDER BY COUNT DESC;
+SELECT * FROM current_titles;
+SELECT SUM(count) FROM current_titles;
+
+--get the sum of mentorship eligibility by title 
+--group mentorship into title 
+SELECT COUNT(me.emp_no), me.title
+INTO mentorship_titles
+FROM mentorship_eligibilty as me
+GROUP BY me.title
+ORDER BY COUNT DESC;
